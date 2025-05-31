@@ -10,29 +10,56 @@ import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.table.DefaultTableModel;
 /**
  *
  * @author Wahyu
  */
 public class frmTeman extends javax.swing.JFrame {
+    DefaultTableModel TM = new DefaultTableModel();
 
     /**
      * Creates new form frmTeman
      */
     public frmTeman() throws SQLException{
         initComponents();
+        
+        tblTeman.setModel(TM);
+        TM.addColumn("No");
+        TM.addColumn("Nama Teman");
+        TM.addColumn("Alamat");
+        TM.addColumn("Telp");
+        
+        this.dtTemanList();
+        
         Connection cnn = koneksi();  
         PreparedStatement PS = cnn.prepareStatement("SELECT * FROM datateman;");
         ResultSet RS = PS.executeQuery();
         
-        while(RS.next()){
-            txNama.setText(RS.getString("namateman"));
-            txAlamat.setText(RS.getString("alamat"));
-            txTelp.setText(RS.getString("telp"));
-
-        }
+//        while(RS.next()){
+//            txNama.setText(RS.getString("namateman"));
+//            txAlamat.setText(RS.getString("alamat"));
+//            txTelp.setText(RS.getString("telp"));
+//
+//        }
     }
-
+    private void dtTemanList() throws SQLException{
+        Connection cnn = koneksi();
+        PreparedStatement PS = cnn.prepareStatement("SELECT * FROM datateman;");
+        ResultSet RS = PS.executeQuery();
+        
+        TM.getDataVector().removeAllElements();
+        TM.fireTableDataChanged();
+        
+        while(RS.next() ){
+            Object[] dta = new Object[4];
+                dta[0] = RS.getInt("idteman");
+                dta[1] = RS.getString("namateman");
+                dta[2] = RS.getString("alamat");
+                dta[3] = RS.getString("telp");
+            TM.addRow(dta);
+        }
+}
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -49,6 +76,12 @@ public class frmTeman extends javax.swing.JFrame {
         txTelp = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
+        jScrollPane1 = new javax.swing.JScrollPane();
+        tblTeman = new javax.swing.JTable();
+        btnTambah = new javax.swing.JButton();
+        btnUbah = new javax.swing.JButton();
+        btnHapus = new javax.swing.JButton();
+        btnTutup = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Data Teman");
@@ -69,6 +102,45 @@ public class frmTeman extends javax.swing.JFrame {
         jLabel4.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
         jLabel4.setText("Data Teman");
 
+        tblTeman.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "ID", "Nama", "Alamat", "Telp"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        tblTeman.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblTemanMouseClicked(evt);
+            }
+        });
+        jScrollPane1.setViewportView(tblTeman);
+
+        btnTambah.setText("Tambah");
+        btnTambah.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTambahActionPerformed(evt);
+            }
+        });
+
+        btnUbah.setText("Ubah");
+
+        btnHapus.setText("Hapus");
+
+        btnTutup.setText("Tutup");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -76,38 +148,85 @@ public class frmTeman extends javax.swing.JFrame {
             .addGroup(layout.createSequentialGroup()
                 .addGap(17, 17, 17)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(jLabel2)
-                        .addComponent(jLabel1)
-                        .addComponent(txNama)
-                        .addComponent(txAlamat)
-                        .addComponent(txTelp, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel3))
-                    .addComponent(jLabel4))
-                .addContainerGap(394, Short.MAX_VALUE))
+                    .addComponent(jLabel4)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(57, 57, 57)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel2)
+                            .addComponent(jLabel1)
+                            .addComponent(txNama)
+                            .addComponent(txAlamat)
+                            .addComponent(txTelp, javax.swing.GroupLayout.PREFERRED_SIZE, 132, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel3)
+                            .addComponent(btnTambah)
+                            .addComponent(btnUbah)
+                            .addComponent(btnHapus)
+                            .addComponent(btnTutup))))
+                .addContainerGap(93, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGap(40, 40, 40)
-                .addComponent(jLabel4)
-                .addGap(27, 27, 27)
-                .addComponent(jLabel1)
-                .addGap(4, 4, 4)
-                .addComponent(txNama, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jLabel2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txAlamat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addComponent(jLabel3)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txTelp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(95, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(40, 40, 40)
+                        .addComponent(jLabel4)
+                        .addGap(32, 32, 32)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(166, 166, 166)
+                        .addComponent(jLabel1)
+                        .addGap(4, 4, 4)
+                        .addComponent(txNama, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txAlamat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel3)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txTelp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(31, 31, 31)
+                        .addComponent(btnTambah)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnUbah)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnHapus)
+                        .addGap(18, 18, 18)
+                        .addComponent(btnTutup)))
+                .addContainerGap(50, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void tblTemanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblTemanMouseClicked
+        // TODO add your handling code here:
+//         String sql = "SELECT * FROM datateman WHERE idteman="+tblTeman.getValueAt(tblTeman.getSelectedRow(), 0)+";";
+//         Connection cnn = koneksi();
+//         PreparedStatement PS = null;
+//        try {
+//            PS = cnn.prepareStatement(sql);
+//        } catch (SQLException ex) {
+//            Logger.getLogger(frmTeman.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+//        try {
+//            ResultSet RS = PS.executeQuery();
+//            txNama.setText(RS.getString("namateman"));
+//            txAlamat.setText(RS.getString("alamat"));
+//            txTelp.setText(RS.getString("telp"));
+//        } catch (SQLException ex) {
+//            Logger.getLogger(frmTeman.class.getName()).log(Level.SEVERE, null, ex);
+//        }
+         txNama.setText( tblTeman.getValueAt(tblTeman.getSelectedRow(), 1).toString());
+         txAlamat.setText(tblTeman.getValueAt(tblTeman.getSelectedRow(), 2).toString());
+         txTelp.setText(tblTeman.getValueAt(tblTeman.getSelectedRow(), 3).toString());
+    }//GEN-LAST:event_tblTemanMouseClicked
+
+    private void btnTambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTambahActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnTambahActionPerformed
 
     /**
      * @param args the command line arguments
@@ -149,10 +268,16 @@ public class frmTeman extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton btnHapus;
+    private javax.swing.JButton btnTambah;
+    private javax.swing.JButton btnTutup;
+    private javax.swing.JButton btnUbah;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTable tblTeman;
     private javax.swing.JTextField txAlamat;
     private javax.swing.JTextField txNama;
     private javax.swing.JTextField txTelp;
