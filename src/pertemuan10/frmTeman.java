@@ -10,12 +10,14 @@ import java.sql.SQLException;
 import java.sql.ResultSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 /**
  *
  * @author Wahyu
  */
 public class frmTeman extends javax.swing.JFrame {
+    String edNama;
     DefaultTableModel TM = new DefaultTableModel();
 
     /**
@@ -31,18 +33,66 @@ public class frmTeman extends javax.swing.JFrame {
         TM.addColumn("Telp");
         
         this.dtTemanList();
-        
-        Connection cnn = koneksi();  
-        PreparedStatement PS = cnn.prepareStatement("SELECT * FROM datateman;");
-        ResultSet RS = PS.executeQuery();
-        
-//        while(RS.next()){
-//            txNama.setText(RS.getString("namateman"));
-//            txAlamat.setText(RS.getString("alamat"));
-//            txTelp.setText(RS.getString("telp"));
-//
-//        }
+        fieldisEnabled(false);
+        tombolisEnabled(false);
+        btnTambah.setEnabled(true);
+        btnTutup.setEnabled(true);
     }
+    
+    private void fieldisEnabled(boolean opsi){
+        txNama.setEditable(opsi);
+        txAlamat.setEditable(opsi);
+        txTelp.setEditable(opsi);
+    }
+    
+    private void tombolisEnabled(boolean opsi){
+        btnTambah.setEnabled(opsi);
+        btnUbah.setEnabled(opsi);
+        btnHapus.setEnabled(opsi);
+        btnTutup.setEnabled(opsi);
+    }
+    
+    private void resetForm(){
+        txNama.setText("");
+        txAlamat.setText("");
+        txTelp.setText("");
+    }
+    
+//    CRUD
+    private void storeData() throws SQLException{
+        String namateman = txNama.getText();
+        String alamat = txAlamat.getText();
+        String telp = txTelp.getText();
+        
+        Connection cnn = koneksi();
+        PreparedStatement PS = cnn.prepareStatement("INSERT INTO datateman(namateman, alamat, telp) VALUES(?,?,?);");
+        PS.setString(1, namateman);
+        PS.setString(2, alamat);
+        PS.setString(3, telp);
+        PS.executeUpdate();
+    }
+//    ubah data
+    private void updateData()throws SQLException{
+        String namateman = txNama.getText();
+        String alamat = txAlamat.getText();
+        String telp = txTelp.getText();
+        
+        Connection cnn = koneksi();
+        PreparedStatement PS = cnn.prepareStatement("UPDATE datateman SET namateman=?, alamat=?, telp=? WHERE namateman=?;");
+        PS.setString(1, namateman);
+        PS.setString(2, alamat);
+        PS.setString(3, telp);
+        PS.setString(4, this.edNama);
+        PS.executeUpdate();
+    }
+    private void destroyData()throws SQLException{
+        String namateman = txNama.getText();
+        Connection cnn = koneksi();
+        PreparedStatement PS = cnn.prepareStatement("DELETE FROM datateman WHERE namateman=?;");
+        PS.setString(1, namateman);
+        PS.executeUpdate();
+    }
+            
     private void dtTemanList() throws SQLException{
         Connection cnn = koneksi();
         PreparedStatement PS = cnn.prepareStatement("SELECT * FROM datateman;");
@@ -136,10 +186,25 @@ public class frmTeman extends javax.swing.JFrame {
         });
 
         btnUbah.setText("Ubah");
+        btnUbah.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUbahActionPerformed(evt);
+            }
+        });
 
         btnHapus.setText("Hapus");
+        btnHapus.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnHapusActionPerformed(evt);
+            }
+        });
 
         btnTutup.setText("Tutup");
+        btnTutup.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnTutupActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -202,31 +267,104 @@ public class frmTeman extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void tblTemanMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblTemanMouseClicked
-        // TODO add your handling code here:
-//         String sql = "SELECT * FROM datateman WHERE idteman="+tblTeman.getValueAt(tblTeman.getSelectedRow(), 0)+";";
-//         Connection cnn = koneksi();
-//         PreparedStatement PS = null;
-//        try {
-//            PS = cnn.prepareStatement(sql);
-//        } catch (SQLException ex) {
-//            Logger.getLogger(frmTeman.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-//        try {
-//            ResultSet RS = PS.executeQuery();
-//            txNama.setText(RS.getString("namateman"));
-//            txAlamat.setText(RS.getString("alamat"));
-//            txTelp.setText(RS.getString("telp"));
-//        } catch (SQLException ex) {
-//            Logger.getLogger(frmTeman.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+
          txNama.setText( tblTeman.getValueAt(tblTeman.getSelectedRow(), 1).toString());
          txAlamat.setText(tblTeman.getValueAt(tblTeman.getSelectedRow(), 2).toString());
          txTelp.setText(tblTeman.getValueAt(tblTeman.getSelectedRow(), 3).toString());
+         btnUbah.setEnabled(true);
+         btnHapus.setEnabled(true);
     }//GEN-LAST:event_tblTemanMouseClicked
 
     private void btnTambahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTambahActionPerformed
-        // TODO add your handling code here:
+        if(btnTambah.getText().equals("Tambah")){
+            tombolisEnabled(false);
+            btnTambah.setText("Simpan");
+            btnTutup.setText("Batal");
+            btnTambah.setEnabled(true);
+            btnTutup.setEnabled(true);
+            resetForm();
+            fieldisEnabled(true);
+        }else{
+            btnTambah.setText("Tambah");
+            btnTutup.setText("Tutup");
+            try {
+                storeData();
+                dtTemanList();
+            } catch (SQLException ex) {
+                Logger.getLogger(frmTeman.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            resetForm();
+            fieldisEnabled(false);
+        }
     }//GEN-LAST:event_btnTambahActionPerformed
+
+    private void btnTutupActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTutupActionPerformed
+        if (btnTutup.getText().equals("Tutup")){
+            int jopsi = JOptionPane.showOptionDialog(this, 
+                    "Yakin akan menutup aplikasi?", 
+                    "Konfirmasi tutup aplikasi", 
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE, 
+                    null, null, null);
+            if(jopsi==JOptionPane.YES_OPTION){
+                System.exit(0);
+            }
+        }else{
+            resetForm();
+            fieldisEnabled(false);
+            btnTambah.setText("Tambah");
+            btnTutup.setText("Tutup");
+            btnUbah.setText("Ubah");
+            btnTambah.setEnabled(true);
+            btnUbah.setEnabled(false);
+        }
+    }//GEN-LAST:event_btnTutupActionPerformed
+
+    private void btnUbahActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUbahActionPerformed
+        if(btnUbah.getText().equals("Ubah")){
+            btnUbah.setText("Simpan");
+            btnTutup.setText("Batal");
+            tombolisEnabled(false);
+            btnUbah.setEnabled(true);
+            btnTutup.setEnabled(true);
+            btnTutup.setEnabled(true);
+            fieldisEnabled(true);
+            this.edNama = txNama.getText();
+        }else{
+            try {
+                updateData();
+                dtTemanList();
+            } catch (SQLException ex) {
+                Logger.getLogger(frmTeman.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            btnUbah.setText("Ubah");
+            btnTutup.setText("Tutup");
+            btnTambah.setEnabled(true);
+            btnHapus.setEnabled(true);
+        }
+    }//GEN-LAST:event_btnUbahActionPerformed
+
+    private void btnHapusActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnHapusActionPerformed
+        String isNama = txNama.getText();
+        int jopsi = JOptionPane.showOptionDialog(this,
+                "Apakah yakin ingin menghapus data "+isNama+"?", 
+                "Konfirmasi Hapus Data",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE, 
+                null, null, null);
+        if(jopsi == JOptionPane.YES_OPTION){
+            try {
+                destroyData();
+                dtTemanList();
+                
+                resetForm();
+                btnUbah.setEnabled(false);
+                btnHapus.setEnabled(false);
+            } catch (SQLException ex) {
+                Logger.getLogger(frmTeman.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_btnHapusActionPerformed
 
     /**
      * @param args the command line arguments
